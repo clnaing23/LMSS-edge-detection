@@ -58,11 +58,6 @@ def edgeLinking(mag, high, low):
     # Initialize the result image with strong edges
     result[strong_edges] = 255
 
-    # Define 8-connectivity kernel
-    kernel = np.array([[1, 1, 1],
-                       [1, 0, 1],
-                       [1, 1, 1]], dtype=np.uint8)
-
     # Perform edge linking
     for i in range(1, rows - 1):
         for j in range(1, cols - 1):
