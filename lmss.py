@@ -26,6 +26,7 @@ def read(image):
 outputPath = './output'
 
 def guassianBlur(img, s):
+    # Apply Gaussian Blur
     return cv2.GaussianBlur(img, (s, s), 0)
 
 def save(image, str):
@@ -37,50 +38,20 @@ def sobel(image, str):
     sobel_x = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=3)
     sobel_y = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=3)
 
+
     magnitude = np.sqrt(sobel_x**2 + sobel_y**2)
-    direction = np.arctan2(sobel_y, sobel_x) * (180 / np.pi)
 
 
     # Save the result
     save(magnitude, str)
-    return (magnitude,direction)
-
-def nonMaxima(magnitude, degree):
-    if magnitude.ndim == 3:
-        magnitude = np.sqrt(np.sum(magnitude**2, axis=-1))
-
-    rows, cols = magnitude.shape
-    result = np.zeros_like(magnitude, dtype=np.uint8)
-
-    angle_quantized = (np.round(degree / 45.0) % 4).astype(int) * 45  # Quantize angles to 0, 45, 90, 135 degrees
-
-    for i in range(1, rows - 1):
-        for j in range(1, cols - 1):
-            q = 255  # Default value, pixel is a local maximum
-
-            # Check the neighbors based on the quantized angle
-            if angle_quantized[i, j] == 0 and any(magnitude[i, j] >= x for x in [magnitude[i, j + 1], magnitude[i, j - 1]]) and all(magnitude[i, j] >= x for x in [magnitude[i - 1, j], magnitude[i + 1, j]]):
-                q = max(magnitude[i, j], magnitude[i, j + 1], magnitude[i, j - 1])
-            elif angle_quantized[i, j] == 45 and any(magnitude[i, j] >= x for x in [magnitude[i - 1, j + 1], magnitude[i + 1, j - 1]]) and all(magnitude[i, j] >= x for x in [magnitude[i + 1, j - 1], magnitude[i - 1, j + 1]]):
-                q = max(magnitude[i, j], magnitude[i - 1, j + 1], magnitude[i + 1, j - 1])
-            elif angle_quantized[i, j] == 90 and any(magnitude[i, j] >= x for x in [magnitude[i + 1, j], magnitude[i - 1, j]]) and all(magnitude[i, j] >= x for x in [magnitude[i, j + 1], magnitude[i, j - 1]]):
-                q = max(magnitude[i, j], magnitude[i + 1, j], magnitude[i - 1, j])
-            elif angle_quantized[i, j] == 135 and any(magnitude[i, j] >= x for x in [magnitude[i - 1, j - 1], magnitude[i + 1, j + 1]]) and all(magnitude[i, j] >= x for x in [magnitude[i - 1, j + 1], magnitude[i + 1, j - 1]]):
-                q = max(magnitude[i, j], magnitude[i - 1, j - 1], magnitude[i + 1, j + 1])
-
-            # Perform non-maximum suppression
-            if magnitude[i, j] >= q:
-                result[i, j] = magnitude[i, j]
-            else:
-                result[i, j] = 0
-
-    return result
+    return magnitude
 
 
 def edgeLinking(mag, high, low):
     rows, cols = mag.shape
     result = np.zeros_like(mag, dtype=np.uint8)
 
+    #high low thresholding
     strong_edges = mag > high
     weak_edges = (mag >= low) & (mag <= high)
 
@@ -109,16 +80,13 @@ input_image = read(image)
 blurred_image = guassianBlur(input_image, s=5)
 
 # Applying Sobel
-magnitude, direction  = sobel(blurred_image, os.path.join(outputPath, imageName + '_sobel' + filetype))
-
-# Applying non-maxima suppression
-
-non_maximized = nonMaxima(magnitude, direction)
-
-# Applying thresholding
+magnitude  = sobel(blurred_image, os.path.join(outputPath, imageName + '_sobel' + filetype))
 
 
 # Applying edge linking
+
+# The edge linking function takes the magnitude image and two thresholds
+# Adjust the thresholds to get the best results, which differ between images
 result_image_linked = edgeLinking(magnitude, high=150, low=50)
 
 # Save the results

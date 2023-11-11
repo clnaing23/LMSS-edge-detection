@@ -1,4 +1,6 @@
-# LMSScn
+# LMSS-EDGE-DETECTION
+# Chris Naing and Nathan Mo
+
 LMSS tutorial for CS 327
 
 
