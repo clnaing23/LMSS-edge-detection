@@ -3,7 +3,7 @@ import cv2
 import os
 
 photoPath = './photos'
-imageFile = '/nathan.jpg'
+imageFile = '/bulbasaur.jpg'
 
 # remove "/" and . from filename
 imageName = imageFile[1:-4]
