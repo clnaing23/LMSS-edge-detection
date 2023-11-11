@@ -68,7 +68,9 @@ def edgeLinking(mag, high, low):
 
     return result
 
-# Example usage:
+
+
+#Image Processing
 input_image = read(image)
 
 # Applying Gaussian Blur
