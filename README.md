@@ -30,3 +30,4 @@ run the following command to run the program
 Step 5.
 check the output folder for the output image, you'll see two images, one for the result after the sobel filter and one for the result after the edge detection
 
+Play with thresholds to see how it affects the output image

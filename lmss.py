@@ -2,18 +2,24 @@ import numpy as np
 import cv2
 import os
 
-photoPath = './photos'
-imageFile = '/bulbasaur.jpg'
 
-# remove "/" and . from filename
+#####
+#CHANGE THIS TO THE IMAGE YOU WANT TO USE (MUST BE IN THE PHOTOS FOLDER). 
+#MAKE SURE TO INCLUDE THE FILE EXTENSION (.png, .jpg, etc.) and the / at the beginning
+#Example: imageFile = '/example.png'
+
+imageFile = '/bulbasaur.jpg'
+#####
+
+
+
+photoPath = './photos'
 imageName = imageFile[1:-4]
 filetype = imageFile[-4:]
 
 image = os.path.join(photoPath, imageName + filetype)
 
 def read(image):
-    # img = cv2.imread(image)
-    # return cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     img = cv2.imread(image, 0)
     return img
 
@@ -26,14 +32,11 @@ def save(image, str):
     cv2.imwrite(str, image)
 
 def sobel(image, str):
-    # Convert the image to grayscale
-    # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Apply Sobel filter in the x and y directions
     sobel_x = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=3)
     sobel_y = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=3)
 
-    # Compute the magnitude of the gradient
     magnitude = np.sqrt(sobel_x**2 + sobel_y**2)
     direction = np.arctan2(sobel_y, sobel_x) * (180 / np.pi)
 
@@ -73,22 +76,6 @@ def nonMaxima(magnitude, degree):
 
     return result
 
-def threshold(mag, nonedge):
-    # Define low and high thresholds based on non-edge percentage
-    low_threshold = np.percentile(mag, nonedge)
-    high_threshold = np.percentile(mag, 100 - nonedge)
-
-    # Initialize the result image with zeros
-    result = np.zeros_like(mag, dtype=np.uint8)
-
-    # Apply hysteresis thresholding
-    strong_edges = mag > high_threshold
-    weak_edges = (mag >= low_threshold) & (mag <= high_threshold)
-
-    result[strong_edges] = 255  # Strong edges
-    result[weak_edges] = 50  # Weak edges (can be further processed in edge tracking)
-
-    return result
 
 def edgeLinking(mag, high, low):
     rows, cols = mag.shape
@@ -125,15 +112,11 @@ blurred_image = guassianBlur(input_image, s=5)
 magnitude, direction  = sobel(blurred_image, os.path.join(outputPath, imageName + '_sobel' + filetype))
 
 # Applying non-maxima suppression
-# sobel_x = cv2.Sobel(blurred_image, cv2.CV_64F, 1, 0, ksize=3)
-# sobel_y = cv2.Sobel(blurred_image, cv2.CV_64F, 0, 1, ksize=3)
-# magnitude = np.sqrt(sobel_x**2 + sobel_y**2)
-# degree = np.arctan2(sobel_y, sobel_x) * (180 / np.pi)
 
 non_maximized = nonMaxima(magnitude, direction)
 
 # Applying thresholding
-result_image_thresholded = threshold(non_maximized, nonedge=90)
+
 
 # Applying edge linking
 result_image_linked = edgeLinking(magnitude, high=150, low=50)
